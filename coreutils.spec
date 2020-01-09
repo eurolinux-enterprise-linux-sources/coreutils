@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 21%{?dist}
+Release: 23%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -48,6 +48,10 @@ Patch15: coreutils-8.22-ls-interruption.patch
 # df: do not stat file systems that do not satisfy the -t/-x args (#1511947)
 Patch17: coreutils-8.22-df-stat.patch
 
+# mv -n: do not overwrite the destination (#1526265)
+# http://git.savannah.gnu.org/cgit/coreutils.git/commit/?id=v8.29-9-g29baf25aa
+Patch18: coreutils-8.22-mv-n-noreplace.patch
+
 # Our patches
 #general patch to workaround koji build system issues
 Patch100: coreutils-6.10-configuration.patch
@@ -80,6 +84,9 @@ Patch800: coreutils-i18n.patch
 
 # fold: preserve new-lines in mutlibyte text (#1418505)
 Patch801: coreutils-i18n-fold-newline.patch
+
+# sort -M: fix memory leak when using multibyte locale (#1540059)
+Patch802: coreutils-i18n-sort-memleak.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -129,9 +136,10 @@ Provides: /bin/touch
 Provides: /bin/true
 Provides: /bin/uname
 
+BuildRequires: bison
+BuildRequires: gettext-devel
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
-BuildRequires: gettext bison
 BuildRequires: texinfo
 BuildRequires: autoconf
 BuildRequires: automake
@@ -221,6 +229,10 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch15  -p1
 %patch17  -p1
 
+# patches added in RHEL-7.6
+%patch18  -p1
+%patch802 -p1
+
 chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh tests/dd/stats.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -231,11 +243,10 @@ find ./po/ -name "*.p*" | xargs \
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
-#autoreconf -i -v
-touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
-aclocal -I m4
-autoconf --force
-automake --copy --add-missing
+
+# needed to properly include the renameat2 gnulib module
+autoreconf -fiv
+
 %configure --enable-largefile \
            --with-openssl=optional ac_cv_lib_crypto_MD5=no \
            --enable-install-program=hostname,arch \
@@ -444,6 +455,13 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Fri Jun 15 2018 Kamil Dudka <kdudka@redhat.com> - 8.22-23
+- update description of the -a/--all option in df.1 man page (#1553212)
+- sort -M: fix memory leak when using multibyte locale (#1540059)
+
+* Wed Jan 24 2018 Kamil Dudka <kdudka@redhat.com> - 8.22-22
+- mv -n: do not overwrite the destination (#1526265)
+
 * Mon Dec 04 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-21
 - timeout: revert the last fix for a possible race (#1439465)
 
