@@ -1,8 +1,7 @@
-diff --git a/src/df.c b/src/df.c
-index e28a656..fe222d9 100644
---- a/src/df.c
-+++ b/src/df.c
-@@ -45,12 +45,12 @@
+diff -urNp coreutils-8.22-orig/src/df.c coreutils-8.22/src/df.c
+--- coreutils-8.22-orig/src/df.c	2015-07-06 15:51:56.218101224 +0200
++++ coreutils-8.22/src/df.c	2015-07-06 16:07:14.429941697 +0200
+@@ -47,12 +47,12 @@ struct devlist
  
  /* Filled with device numbers of examined file systems to avoid
     duplicities in output.  */
@@ -17,12 +16,16 @@ index e28a656..fe222d9 100644
  
  /* If true, show even file systems with zero size or
     uninteresting types.  */
-@@ -609,13 +609,10 @@ excluded_fstype (const char *fstype)
+@@ -617,7 +617,7 @@ excluded_fstype (const char *fstype)
     me_mountdir wins.  */
  
  static void
 -filter_mount_list (void)
 +filter_mount_list (bool devices_only)
+ {
+   struct mount_entry *me;
+ 
+@@ -621,9 +621,6 @@ filter_mount_list (void)
  {
    struct mount_entry *me;
  
@@ -32,7 +35,7 @@ index e28a656..fe222d9 100644
    /* Sort all 'wanted' entries into the list devlist_head.  */
    for (me = mount_list; me;)
      {
-@@ -623,41 +620,66 @@ filter_mount_list (void)
+@@ -631,41 +628,66 @@ filter_mount_list (void)
        struct devlist *devlist;
        struct mount_entry *discard_me = NULL;
  
@@ -119,7 +122,7 @@ index e28a656..fe222d9 100644
          }
        else
          {
-@@ -665,28 +687,49 @@ filter_mount_list (void)
+@@ -673,28 +695,49 @@ filter_mount_list (void)
            devlist = xmalloc (sizeof *devlist);
            devlist->me = me;
            devlist->dev_num = buf.st_dev;
@@ -135,6 +138,16 @@ index e28a656..fe222d9 100644
    /* Finally rebuild the mount_list from the devlist.  */
 -  mount_list = NULL;
 -  while (devlist_head)
+-    {
+-      /* Add the mount entry.  */
+-      me = devlist_head->me;
+-      me->me_next = mount_list;
+-      mount_list = me;
+-      /* Free devlist entry and advance.  */
+-      struct devlist *devlist = devlist_head->next;
+-      free (devlist_head);
+-      devlist_head = devlist;
+-    }
 +  if (! devices_only) {
 +    mount_list = NULL;
 +    while (device_list)
@@ -149,8 +162,8 @@ index e28a656..fe222d9 100644
 +        device_list = devlist;
 +      }
 +  }
-+}
-+
+ }
+ 
 +/* Search a mount entry list for device id DEV.
 +   Return the corresponding mount entry if found or NULL if not.  */
 +
@@ -160,28 +173,20 @@ index e28a656..fe222d9 100644
 +  struct devlist *dl = device_list;
 +
 +  while (dl)
-     {
--      /* Add the mount entry.  */
--      me = devlist_head->me;
--      me->me_next = mount_list;
--      mount_list = me;
--      /* Free devlist entry and advance.  */
--      struct devlist *devlist = devlist_head->next;
--      free (devlist_head);
--      devlist_head = devlist;
++    {
 +      if (dl->dev_num == dev)
 +        return dl->me;
 +      dl = dl->next;
-     }
++    }
 +
 +  return NULL;
- }
- 
++}
++
 +
  /* Return true if N is a known integer value.  On many file systems,
     UINTMAX_MAX represents an unknown value; on AIX, UINTMAX_MAX - 1
     represents unknown.  Use a rule that works on AIX file systems, and
-@@ -856,6 +899,11 @@ get_dev (char const *disk, char const *mount_point, char const* file,
+@@ -887,6 +887,11 @@ get_dev (char const *disk, char const *m
    if (!selected_fstype (fstype) || excluded_fstype (fstype))
      return;
  
@@ -193,7 +198,7 @@ index e28a656..fe222d9 100644
    /* If MOUNT_POINT is NULL, then the file system is not mounted, and this
       program reports on the file system that the special file is on.
       It would be better to report on the unmounted file system,
-@@ -868,9 +916,43 @@ get_dev (char const *disk, char const *mount_point, char const* file,
+@@ -900,9 +924,43 @@ get_dev (char const *disk, char const *m
      fsu = *force_fsu;
    else if (get_fs_usage (stat_file, disk, &fsu))
      {
@@ -240,7 +245,7 @@ index e28a656..fe222d9 100644
      }
  
    if (fsu.fsu_blocks == 0 && !show_all_fs && !show_listed_fs)
-@@ -1275,8 +1357,7 @@ get_all_entries (void)
+@@ -1320,8 +1325,7 @@ get_all_entries (void)
  {
    struct mount_entry *me;
  
@@ -250,20 +255,10 @@ index e28a656..fe222d9 100644
  
    for (me = mount_list; me; me = me->me_next)
      get_dev (me->me_devname, me->me_mountdir, NULL, NULL, me->me_type,
-@@ -1325,7 +1406,7 @@ or all file systems by default.\n\
-       emit_mandatory_arg_note ();
- 
-       fputs (_("\
--  -a, --all             include dummy file systems\n\
-+  -a, --all             include pseudo, duplicate, inaccessible file systems\n\
-   -B, --block-size=SIZE  scale sizes by SIZE before printing them; e.g.,\n\
-                            '-BM' prints sizes in units of 1,048,576 bytes;\n\
-                            see SIZE format below\n\
-diff --git a/doc/coreutils.texi b/doc/coreutils.texi
-index 942d9a1..1df1eac 100644
---- a/doc/coreutils.texi
-+++ b/doc/coreutils.texi
-@@ -11123,11 +11123,15 @@ The program accepts the following options.  Also see @ref{Common options}.
+diff -urNp coreutils-8.22-orig/doc/coreutils.texi coreutils-8.22/doc/coreutils.texi
+--- coreutils-8.22-orig/doc/coreutils.texi	2015-07-06 17:44:13.266328267 +0200
++++ coreutils-8.22/doc/coreutils.texi	2015-07-06 17:48:41.612327379 +0200
+@@ -11149,11 +11149,15 @@ The program accepts the following option
  @itemx --all
  @opindex -a
  @opindex --all
@@ -283,10 +278,9 @@ index 942d9a1..1df1eac 100644
  
  @item -B @var{size}
  @itemx --block-size=@var{size}
-diff --git a/tests/df/skip-duplicates.sh b/tests/df/skip-duplicates.sh
-index 1e94dc0..4069604 100755
---- a/tests/df/skip-duplicates.sh
-+++ b/tests/df/skip-duplicates.sh
+diff -urNp coreutils-8.22-orig/tests/df/skip-duplicates.sh coreutils-8.22/tests/df/skip-duplicates.sh
+--- coreutils-8.22-orig/tests/df/skip-duplicates.sh	2013-12-04 15:48:30.000000000 +0100
++++ coreutils-8.22/tests/df/skip-duplicates.sh	2015-07-06 17:45:47.176027871 +0200
 @@ -2,7 +2,7 @@
  # Test df's behavior when the mount list contains duplicate entries.
  # This test is skipped on systems that lack LD_PRELOAD support; that's fine.
@@ -301,13 +295,14 @@ index 1e94dc0..4069604 100755
  require_gcc_shared_
  
 -df || skip_ "df fails"
-+# We use --local here so as to not activate
-+# potentially very many remote mounts.
-+df --local || skip_ 'df fails'
- 
+-
 -# Simulate an mtab file with two entries of the same device number.
 -# Also add entries with unstatable mount dirs to ensure that's handled.
 -cat > k.c <<'EOF' || framework_failure_
++# We use --local here so as to not activate
++# potentially very many remote mounts.
++df --local || skip_ 'df fails'
++
 +export CU_NONROOT_FS=$(df --local --output=target 2>&1 | grep /. | head -n1)
 +export CU_REMOTE_FS=$(df --local --output=target 2>&1 | grep /. |
 +                      tail -n+2 | head -n1)
@@ -447,13 +442,14 @@ index 1e94dc0..4069604 100755
 -# consist of a header and one entry.
 -LD_PRELOAD=./k.so df >out || fail=1
 -test $(wc -l <out) -eq 2 || { fail=1; cat out; }
-+# consist of a header and unique entries.
-+LD_PRELOAD=$LD_PRELOAD:./k.so df -T >out || fail=1
-+test $(wc -l <out) -eq $(expr 1 + $unique_entries) || { fail=1; cat out; }
- 
+-
 -# Ensure we fail when unable to stat invalid entries
 -LD_PRELOAD=./k.so CU_TEST_DUPE_INVALID=1 df >out && fail=1
 -test $(wc -l <out) -eq 2 || { fail=1; cat out; }
++# consist of a header and unique entries.
++LD_PRELOAD=$LD_PRELOAD:./k.so df -T >out || fail=1
++test $(wc -l <out) -eq $(expr 1 + $unique_entries) || { fail=1; cat out; }
++
 +# With --total we should suppress the duplicate but separate remote file system
 +LD_PRELOAD=$LD_PRELOAD:./k.so df --total >out || fail=1
 +test "$CU_REMOTE_FS" && elide_remote=1 || elide_remote=0
@@ -488,10 +484,9 @@ index 1e94dc0..4069604 100755
  
  # Ensure that filtering duplicates does not affect
  # argument processing (now without the fake getmntent()).
-diff --git a/init.cfg b/init.cfg
-index 360d4da..16f9813 100644
---- a/init.cfg
-+++ b/init.cfg
+diff -urNp coreutils-8.22-orig/init.cfg coreutils-8.22/init.cfg
+--- coreutils-8.22-orig/init.cfg	2015-07-06 18:04:08.930235675 +0200
++++ coreutils-8.22/init.cfg	2015-07-06 18:04:41.939481587 +0200
 @@ -472,6 +472,18 @@ require_sparse_support_()
    fi
  }

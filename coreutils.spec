@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 24%{?dist}
+Release: 15%{?dist}.1
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -33,36 +33,6 @@ Patch8: coreutils-8.22-df-getdisk.patch
 Patch9: coreutils-8.22-df-filtermountlistupdate.patch
 #Prevent potential corruption of sparse files in cp
 Patch10: coreutils-8.22-cp-sparsecorrupt.patch
-#improve dirent d_type support verification (xfs build failure, #1263341)
-Patch11: coreutils-8.22-xfsbuildfailure.patch
-#Update filesystem magic lists from latest upstream (coreutils-8.25)
-Patch12: coreutils-8.22-newfilesystems.patch
-#Fix crash in date with empty TZ envvar
-Patch13: coreutils-8.22-date-emptyTZ.patch
-#df -l: do not hang on a dead autofs mount point (#1309247)
-Patch14: coreutils-8.22-df-autofs.patch 
-
-# ls: allow interruption when reading slow directories (#1421802)
-Patch15: coreutils-8.22-ls-interruption.patch
-
-# df: do not stat file systems that do not satisfy the -t/-x args (#1511947)
-Patch17: coreutils-8.22-df-stat.patch
-
-# mv -n: do not overwrite the destination (#1526265)
-# http://git.savannah.gnu.org/cgit/coreutils.git/commit/?id=v8.29-9-g29baf25aa
-Patch18: coreutils-8.22-mv-n-noreplace.patch
-
-# df: prioritize mounts nearer the device root (#1042840)
-Patch19: coreutils-8.22-df-bind-mount.patch
-
-# df: avoid stat() for dummy file systems with -l (#1668137)
-Patch20: coreutils-8.22-df-dummy-local.patch
-
-# doc: fix typo in date example (#1620624)
-Patch21: coreutils-8.22-date-example-typo.patch
-
-# doc: improve description of the --kibibytes option of ls (#1527391)
-Patch22: coreutils-8.22-doc-ls-kibibytes.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -83,8 +53,6 @@ Patch108: coreutils-8.22-ppc64le.patch
 Patch109: coreutils-8.22-id-groups.patch
 #fix some non-default tests failing in beaker environment(#1247641)
 Patch110: coreutils-8.22-non-defaulttests.patch
-#Fix sort -h for other than first field
-Patch111: coreutils-8.22-sort-blanks.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -94,21 +62,12 @@ Patch713: coreutils-4.5.3-langinfo.patch
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
 Patch800: coreutils-i18n.patch
 
-# fold: preserve new-lines in mutlibyte text (#1418505)
-Patch801: coreutils-i18n-fold-newline.patch
-
-# sort -M: fix memory leak when using multibyte locale (#1540059)
-Patch802: coreutils-i18n-sort-memleak.patch
-
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
 #Prevent buffer overflow in who(1) (bug #158405).
 Patch912: coreutils-overflow.patch
 #Temporarily disable df symlink test, failing
 Patch913: coreutils-8.22-temporarytestoff.patch
-#Disable id/setgid.sh test, fix false positive failure of cp-a-selinux test 
-# (#1266501, #1266500)
-Patch914: coreutils-8.22-failingtests.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -148,10 +107,9 @@ Provides: /bin/touch
 Provides: /bin/true
 Provides: /bin/uname
 
-BuildRequires: bison
-BuildRequires: gettext-devel
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
+BuildRequires: gettext bison
 BuildRequires: texinfo
 BuildRequires: autoconf
 BuildRequires: automake
@@ -201,10 +159,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch8 -p1 -b .getdisk
 %patch9 -p1 -b .findmnt
 %patch10 -p1 -b .sparse
-%patch11 -p1 -b .d_type
-%patch12 -p1 -b .newfs
-%patch13 -p1 -b .emptytz
-%patch14 -p1 -b .df-autofs
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -216,7 +170,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch108 -p1 -b .ppc64le
 %patch109 -p1 -b .groups
 %patch110 -p1 -b .nondefault
-%patch111 -p1 -b .blanks
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -229,27 +182,11 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .testoff
-%patch914 -p1 -b .testfail
 
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 %patch5 -p1 -b .separate
-
-# patches added in RHEL-7.5
-%patch801 -p1
-%patch15  -p1
-%patch17  -p1
-
-# patches added in RHEL-7.6
-%patch18  -p1
-%patch802 -p1
-
-# patches added in RHEL-7.7
-%patch19 -p1
-%patch20 -p1
-%patch21 -p1
-%patch22 -p1
 
 chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh tests/dd/stats.sh || :
 
@@ -261,10 +198,11 @@ find ./po/ -name "*.p*" | xargs \
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
-
-# needed to properly include the renameat2 gnulib module
-autoreconf -fiv
-
+#autoreconf -i -v
+touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
+aclocal -I m4
+autoconf --force
+automake --copy --add-missing
 %configure --enable-largefile \
            --with-openssl=optional ac_cv_lib_crypto_MD5=no \
            --enable-install-program=hostname,arch \
@@ -273,8 +211,6 @@ autoreconf -fiv
 
 # Regenerate manpages
 touch man/*.x
-# Do not regenerate fs-is-local.h
-touch src/fs-is-local.h
 
 make all %{?_smp_mflags}
 
@@ -473,46 +409,8 @@ fi
 %{_sbindir}/chroot
 
 %changelog
-* Fri Mar 15 2019 Kamil Dudka <kdudka@redhat.com> - 8.22-24
-- doc: improve description of the --kibibytes option of ls (#1527391)
-- doc: fix typo in date example (#1620624)
-- stat,tail: sync the list of file systems with coreutils-8.31 (#1659530)
-- df: avoid stat() for dummy file systems with -l (#1668137)
-- df: prioritize mounts nearer the device root (#1042840)
-
-* Fri Jun 15 2018 Kamil Dudka <kdudka@redhat.com> - 8.22-23
-- update description of the -a/--all option in df.1 man page (#1553212)
-- sort -M: fix memory leak when using multibyte locale (#1540059)
-
-* Wed Jan 24 2018 Kamil Dudka <kdudka@redhat.com> - 8.22-22
-- mv -n: do not overwrite the destination (#1526265)
-
-* Mon Dec 04 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-21
-- timeout: revert the last fix for a possible race (#1439465)
-
-* Thu Nov 23 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-20
-- df: do not stat file systems that do not satisfy the -t/-x args (#1511947)
-
-* Thu Sep 21 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-19
-- timeout: fix race possibly terminating wrong process (#1439465)
-- ls: allow interruption when reading slow directories (#1421802)
-- fold: preserve new-lines in mutlibyte text (#1418505)
-
-* Fri Jul 01 2016 Ondrej Vasik <ovasik@redhat.com> - 8.22-18
-- fix xfs build failure in chrooted environment (#1263341)
-- update filesystem lists for stat and tail from latest upstream
-  (#1327881, #1280357) 
-- disable id/setgid.sh test(missing chroot feature), fix 
-  cp-a-selinux test (#1266500,#1266501)
-- colorls.sh - change detection of interactive shell for ksh
-  compatibility (#1321648)
-- fix date --date crash with empty or invalid TZ envvar (#1325786)
-- df -l: do not hang on a dead autofs mount point (#1309247)
-- sort -h: fix functionality of human readable numeric sort for other
-  than first field (#1328360)
-
-* Wed Nov 25 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-16
-- cp: prevent potential sparse file corruption (#1284906)
+* Wed Nov 25 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-15.1
+- cp: prevent potential sparse file corruption (#1285365)
 
 * Sat Sep 12 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-15
 - fix one more occurance of non-full path in colorls.sh (#1222223)
