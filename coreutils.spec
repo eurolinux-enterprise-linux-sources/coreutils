@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 37%{?dist}
+Release: 37%{?dist}.3
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -22,6 +22,8 @@ Source203:  coreutils-runuser-l.pamd
 Patch1: coreutils-8.4-who-msgstatus.patch
 #fix detection of xattr support in configure
 Patch2: coreutils-8.4-xattrmodule.patch
+#ls: improve efficiency on fs without acl/xattr/selinux support (#1248141)
+Patch3: coreutils-8.4-ls-enotsupimprovement.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -140,6 +142,8 @@ Patch946: coreutils-8.4-tail-symlink-polling.patch
 Patch947: coreutils-8.4-chcon-defaultsymlink.patch
 #fix the dd test sparse on xfs (#1075679)
 Patch948: coreutils-8.4-dd-sparse-xfsfailtest.patch
+#su: fix incorrect message printing when su is killed (#1266380)
+Patch949: coreutils-8.4-su-coredump-message.patch
 
 
 #SELINUX Patch - implements Redhat changes
@@ -268,9 +272,11 @@ Libraries for coreutils package.
 %patch946 -p1 -b .polling
 %patch947 -p1 -b .symlink
 %patch948 -p1 -b .xfs
+%patch949 -p1 -b .su-coredump-msg
 %patch107 -p1 -b .symder
 %patch108 -p1 -b .countbytes
 %patch109 -p1 -b .nouser
+%patch3 -p1 -b .enotsup
 
 chmod a+x tests/misc/sort-mb-tests tests/df/direct tests/ls/slink-acl tests/dd/sparse tests/dd/bytes
 
@@ -464,6 +470,13 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Oct 21 2015  Ondrej Vasik <ovasik@redhat.com> - 8.4-37.3
+- ls: improve efficiency on filesystems without support for ACLs,
+  xattrs or SELinux (#1273823)
+
+* Fri Sep 25 2015 Ondrej Oprala <ooprala@redhat.com> - 8.4-37.1
+- su: fix incorrect message printing when su is killed (#1266380)
+
 * Wed Jul 16 2014 Ondrej Oprala <ooprala@redhat.com> - 8.4-37
 - df: canonicalize mount list device names as well (#812449)
 
