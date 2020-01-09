@@ -1,0 +1,347 @@
+ src/fs-is-local.h | 23 ++++++++++++++++++++
+ src/stat.c        | 64 +++++++++++++++++++++++++++++++++++++++++++++++++------
+ src/tail.c        |  2 ++
+ 3 files changed, 83 insertions(+), 6 deletions(-)
+
+diff --git a/src/fs-is-local.h b/src/fs-is-local.h
+index 61849da..5f73488 100644
+--- a/src/fs-is-local.h
++++ b/src/fs-is-local.h
+@@ -6,30 +6,39 @@ is_local_fs_type (unsigned long int magic)
+ {
+   switch (magic)
+     {
++      case S_MAGIC_AAFS: return 1;
++      case S_MAGIC_ACFS: return 0;
+       case S_MAGIC_ADFS: return 1;
+       case S_MAGIC_AFFS: return 1;
+       case S_MAGIC_AFS: return 0;
+       case S_MAGIC_ANON_INODE_FS: return 1;
+       case S_MAGIC_AUFS: return 0;
+       case S_MAGIC_AUTOFS: return 1;
++      case S_MAGIC_BALLOON_KVM: return 1;
+       case S_MAGIC_BEFS: return 1;
+       case S_MAGIC_BDEVFS: return 1;
+       case S_MAGIC_BFS: return 1;
++      case S_MAGIC_BPF_FS: return 1;
+       case S_MAGIC_BINFMTFS: return 1;
+       case S_MAGIC_BTRFS: return 1;
++      case S_MAGIC_BTRFS_TEST: return 1;
+       case S_MAGIC_CEPH: return 0;
+       case S_MAGIC_CGROUP: return 1;
++      case S_MAGIC_CGROUP2: return 1;
+       case S_MAGIC_CIFS: return 0;
+       case S_MAGIC_CODA: return 0;
+       case S_MAGIC_COH: return 1;
++      case S_MAGIC_CONFIGFS: return 1;
+       case S_MAGIC_CRAMFS: return 1;
+       case S_MAGIC_CRAMFS_WEND: return 1;
++      case S_MAGIC_DAXFS: return 1;
+       case S_MAGIC_DEBUGFS: return 1;
+       case S_MAGIC_DEVFS: return 1;
+       case S_MAGIC_DEVPTS: return 1;
+       case S_MAGIC_ECRYPTFS: return 1;
+       case S_MAGIC_EFIVARFS: return 1;
+       case S_MAGIC_EFS: return 1;
++      case S_MAGIC_EXFS: return 1;
+       case S_MAGIC_EXOFS: return 1;
+       case S_MAGIC_EXT: return 1;
+       case S_MAGIC_EXT2: return 1;
+@@ -43,10 +52,13 @@ is_local_fs_type (unsigned long int magic)
+       case S_MAGIC_GFS: return 0;
+       case S_MAGIC_GPFS: return 0;
+       case S_MAGIC_HFS: return 1;
++      case S_MAGIC_HFS_PLUS: return 1;
++      case S_MAGIC_HFS_X: return 1;
+       case S_MAGIC_HOSTFS: return 1;
+       case S_MAGIC_HPFS: return 1;
+       case S_MAGIC_HUGETLBFS: return 1;
+       case S_MAGIC_MTD_INODE_FS: return 1;
++      case S_MAGIC_IBRIX: return 0;
+       case S_MAGIC_INOTIFYFS: return 1;
+       case S_MAGIC_ISOFS: return 1;
+       case S_MAGIC_ISOFS_R_WIN: return 1;
+@@ -55,7 +67,9 @@ is_local_fs_type (unsigned long int magic)
+       case S_MAGIC_JFFS2: return 1;
+       case S_MAGIC_JFS: return 1;
+       case S_MAGIC_KAFS: return 0;
++      case S_MAGIC_LOGFS: return 1;
+       case S_MAGIC_LUSTRE: return 0;
++      case S_MAGIC_M1FS: return 1;
+       case S_MAGIC_MINIX: return 1;
+       case S_MAGIC_MINIX_30: return 1;
+       case S_MAGIC_MINIX_V2: return 1;
+@@ -67,23 +81,29 @@ is_local_fs_type (unsigned long int magic)
+       case S_MAGIC_NFS: return 0;
+       case S_MAGIC_NFSD: return 0;
+       case S_MAGIC_NILFS: return 1;
++      case S_MAGIC_NSFS: return 1;
+       case S_MAGIC_NTFS: return 1;
+       case S_MAGIC_OPENPROM: return 1;
+       case S_MAGIC_OCFS2: return 0;
++      case S_MAGIC_OVERLAYFS: return 0;
+       case S_MAGIC_PANFS: return 0;
+       case S_MAGIC_PIPEFS: return 0;
++      case S_MAGIC_PRL_FS: return 0;
+       case S_MAGIC_PROC: return 1;
+       case S_MAGIC_PSTOREFS: return 1;
+       case S_MAGIC_QNX4: return 1;
+       case S_MAGIC_QNX6: return 1;
+       case S_MAGIC_RAMFS: return 1;
++      case S_MAGIC_RDTGROUP: return 1;
+       case S_MAGIC_REISERFS: return 1;
+       case S_MAGIC_ROMFS: return 1;
+       case S_MAGIC_RPC_PIPEFS: return 1;
++      case S_MAGIC_SDCARDFS: return 1;
+       case S_MAGIC_SECURITYFS: return 1;
+       case S_MAGIC_SELINUX: return 1;
+       case S_MAGIC_SMACK: return 1;
+       case S_MAGIC_SMB: return 0;
++      case S_MAGIC_SMB2: return 0;
+       case S_MAGIC_SNFS: return 0;
+       case S_MAGIC_SOCKFS: return 1;
+       case S_MAGIC_SQUASHFS: return 1;
+@@ -91,6 +111,7 @@ is_local_fs_type (unsigned long int magic)
+       case S_MAGIC_SYSV2: return 1;
+       case S_MAGIC_SYSV4: return 1;
+       case S_MAGIC_TMPFS: return 1;
++      case S_MAGIC_TRACEFS: return 1;
+       case S_MAGIC_UBIFS: return 1;
+       case S_MAGIC_UDF: return 1;
+       case S_MAGIC_UFS: return 1;
+@@ -100,11 +121,13 @@ is_local_fs_type (unsigned long int magic)
+       case S_MAGIC_VMHGFS: return 0;
+       case S_MAGIC_VXFS: return 0;
+       case S_MAGIC_VZFS: return 1;
++      case S_MAGIC_WSLFS: return 1;
+       case S_MAGIC_XENFS: return 1;
+       case S_MAGIC_XENIX: return 1;
+       case S_MAGIC_XFS: return 1;
+       case S_MAGIC_XIAFS: return 1;
+       case S_MAGIC_ZFS: return 1;
++      case S_MAGIC_ZSMALLOC: return 1;
+       default: return -1;
+     }
+ }
+diff --git a/src/stat.c b/src/stat.c
+index ba491f4..718b32a 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -240,6 +240,10 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+          a comment.  The S_MAGIC_... name and constant are automatically
+          combined to produce the #define directives in fs.h.  */
+ 
++    case S_MAGIC_AAFS: /* 0x5A3C69F0 local */
++      return "aafs";
++    case S_MAGIC_ACFS: /* 0x61636673 remote */
++      return "acfs";
+     case S_MAGIC_ADFS: /* 0xADF5 local */
+       return "adfs";
+     case S_MAGIC_AFFS: /* 0xADFF local */
+@@ -255,30 +259,42 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "aufs";
+     case S_MAGIC_AUTOFS: /* 0x0187 local */
+       return "autofs";
++    case S_MAGIC_BALLOON_KVM: /* 0x13661366 local */
++      return "balloon-kvm-fs";
+     case S_MAGIC_BEFS: /* 0x42465331 local */
+       return "befs";
+     case S_MAGIC_BDEVFS: /* 0x62646576 local */
+       return "bdevfs";
+     case S_MAGIC_BFS: /* 0x1BADFACE local */
+       return "bfs";
++    case S_MAGIC_BPF_FS: /* 0xCAFE4A11 local */
++      return "bpf_fs";
+     case S_MAGIC_BINFMTFS: /* 0x42494E4D local */
+       return "binfmt_misc";
+     case S_MAGIC_BTRFS: /* 0x9123683E local */
+       return "btrfs";
++    case S_MAGIC_BTRFS_TEST: /* 0x73727279 local */
++      return "btrfs_test";
+     case S_MAGIC_CEPH: /* 0x00C36400 remote */
+       return "ceph";
+     case S_MAGIC_CGROUP: /* 0x0027E0EB local */
+       return "cgroupfs";
++    case S_MAGIC_CGROUP2: /* 0x63677270 local */
++      return "cgroup2fs";
+     case S_MAGIC_CIFS: /* 0xFF534D42 remote */
+       return "cifs";
+     case S_MAGIC_CODA: /* 0x73757245 remote */
+       return "coda";
+     case S_MAGIC_COH: /* 0x012FF7B7 local */
+       return "coh";
++    case S_MAGIC_CONFIGFS: /* 0x62656570 local */
++      return "configfs";
+     case S_MAGIC_CRAMFS: /* 0x28CD3D45 local */
+       return "cramfs";
+     case S_MAGIC_CRAMFS_WEND: /* 0x453DCD28 local */
+       return "cramfs-wend";
++    case S_MAGIC_DAXFS: /* 0x64646178 local */
++      return "daxfs";
+     case S_MAGIC_DEBUGFS: /* 0x64626720 local */
+       return "debugfs";
+     case S_MAGIC_DEVFS: /* 0x1373 local */
+@@ -291,6 +307,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "efivarfs";
+     case S_MAGIC_EFS: /* 0x00414A53 local */
+       return "efs";
++    case S_MAGIC_EXFS: /* 0x45584653 local */
++      return "exfs";
+     case S_MAGIC_EXOFS: /* 0x5DF5 local */
+       return "exofs";
+     case S_MAGIC_EXT: /* 0x137D local */
+@@ -311,13 +329,17 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "fusectl";
+     case S_MAGIC_FUTEXFS: /* 0x0BAD1DEA local */
+       return "futexfs";
+-    case S_MAGIC_GFS: /* 0x1161970 remote */
++    case S_MAGIC_GFS: /* 0x01161970 remote */
+       return "gfs/gfs2";
+     case S_MAGIC_GPFS: /* 0x47504653 remote */
+       return "gpfs";
+     case S_MAGIC_HFS: /* 0x4244 local */
+       return "hfs";
+-    case S_MAGIC_HOSTFS: /* 0xC0FFEE local */
++    case S_MAGIC_HFS_PLUS: /* 0x482B local */
++      return "hfs+";
++    case S_MAGIC_HFS_X: /* 0x4858 local */
++      return "hfsx";
++    case S_MAGIC_HOSTFS: /* 0x00C0FFEE local */
+       return "hostfs";
+     case S_MAGIC_HPFS: /* 0xF995E849 local */
+       return "hpfs";
+@@ -325,6 +347,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "hugetlbfs";
+     case S_MAGIC_MTD_INODE_FS: /* 0x11307854 local */
+       return "inodefs";
++    case S_MAGIC_IBRIX: /* 0x013111A8 remote */
++      return "ibrix";
+     case S_MAGIC_INOTIFYFS: /* 0x2BAD1DEA local */
+       return "inotifyfs";
+     case S_MAGIC_ISOFS: /* 0x9660 local */
+@@ -341,8 +365,12 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "jfs";
+     case S_MAGIC_KAFS: /* 0x6B414653 remote */
+       return "k-afs";
++    case S_MAGIC_LOGFS: /* 0xC97E8168 local */
++      return "logfs";
+     case S_MAGIC_LUSTRE: /* 0x0BD00BD0 remote */
+       return "lustre";
++    case S_MAGIC_M1FS: /* 0x5346314D local */
++      return "m1fs";
+     case S_MAGIC_MINIX: /* 0x137F local */
+       return "minix";
+     case S_MAGIC_MINIX_30: /* 0x138F local */
+@@ -365,19 +393,28 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "nfsd";
+     case S_MAGIC_NILFS: /* 0x3434 local */
+       return "nilfs";
++    case S_MAGIC_NSFS: /* 0x6E736673 local */
++      return "nsfs";
+     case S_MAGIC_NTFS: /* 0x5346544E local */
+       return "ntfs";
+     case S_MAGIC_OPENPROM: /* 0x9FA1 local */
+       return "openprom";
+-    case S_MAGIC_OCFS2: /* 0x7461636f remote */
++    case S_MAGIC_OCFS2: /* 0x7461636F remote */
+       return "ocfs2";
++    case S_MAGIC_OVERLAYFS: /* 0x794C7630 remote */
++      /* This may overlay remote file systems.
++         Also there have been issues reported with inotify and overlayfs,
++         so mark as "remote" so that polling is used.  */
++      return "overlayfs";
+     case S_MAGIC_PANFS: /* 0xAAD7AAEA remote */
+       return "panfs";
+     case S_MAGIC_PIPEFS: /* 0x50495045 remote */
+       /* FIXME: change syntax or add an optional attribute like "inotify:no".
+-         The above is labeled as "remote" so that tail always uses polling,
+-         but this isn't really a remote file system type.  */
++         pipefs and prlfs are labeled as "remote" so that tail always polls,
++         but these aren't really remote file system types.  */
+       return "pipefs";
++    case S_MAGIC_PRL_FS: /* 0x7C7C6673 remote */
++      return "prl_fs";
+     case S_MAGIC_PROC: /* 0x9FA0 local */
+       return "proc";
+     case S_MAGIC_PSTOREFS: /* 0x6165676C local */
+@@ -388,12 +425,16 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "qnx6";
+     case S_MAGIC_RAMFS: /* 0x858458F6 local */
+       return "ramfs";
++    case S_MAGIC_RDTGROUP: /* 0x07655821 local */
++      return "rdt";
+     case S_MAGIC_REISERFS: /* 0x52654973 local */
+       return "reiserfs";
+     case S_MAGIC_ROMFS: /* 0x7275 local */
+       return "romfs";
+     case S_MAGIC_RPC_PIPEFS: /* 0x67596969 local */
+       return "rpc_pipefs";
++    case S_MAGIC_SDCARDFS: /* 0x5DCA2DF5 local */
++      return "sdcardfs";
+     case S_MAGIC_SECURITYFS: /* 0x73636673 local */
+       return "securityfs";
+     case S_MAGIC_SELINUX: /* 0xF97CFF8C local */
+@@ -402,6 +443,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "smackfs";
+     case S_MAGIC_SMB: /* 0x517B remote */
+       return "smb";
++    case S_MAGIC_SMB2: /* 0xFE534D42 remote */
++      return "smb2";
+     case S_MAGIC_SNFS: /* 0xBEEFDEAD remote */
+       return "snfs";
+     case S_MAGIC_SOCKFS: /* 0x534F434B local */
+@@ -416,6 +459,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "sysv4";
+     case S_MAGIC_TMPFS: /* 0x01021994 local */
+       return "tmpfs";
++    case S_MAGIC_TRACEFS: /* 0x74726163 local */
++      return "tracefs";
+     case S_MAGIC_UBIFS: /* 0x24051905 local */
+       return "ubifs";
+     case S_MAGIC_UDF: /* 0x15013346 local */
+@@ -430,10 +475,14 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "v9fs";
+     case S_MAGIC_VMHGFS: /* 0xBACBACBC remote */
+       return "vmhgfs";
+-    case S_MAGIC_VXFS: /* 0xA501FCF5 local */
++    case S_MAGIC_VXFS: /* 0xA501FCF5 remote */
++      /* Veritas File System can run in single instance or clustered mode,
++         so mark as remote to cater for the latter case.  */
+       return "vxfs";
+     case S_MAGIC_VZFS: /* 0x565A4653 local */
+       return "vzfs";
++    case S_MAGIC_WSLFS: /* 0x53464846 local */
++      return "wslfs";
+     case S_MAGIC_XENFS: /* 0xABBA1974 local */
+       return "xenfs";
+     case S_MAGIC_XENIX: /* 0x012FF7B4 local */
+@@ -444,6 +493,9 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "xia";
+     case S_MAGIC_ZFS: /* 0x2FC12FC1 local */
+       return "zfs";
++    case S_MAGIC_ZSMALLOC: /* 0x58295829 local */
++      return "zsmallocfs";
++
+ 
+ # elif __GNU__
+     case FSTYPE_UFS:
+diff --git a/src/tail.c b/src/tail.c
+index dc4e10d..f4575d8 100644
+--- a/src/tail.c
++++ b/src/tail.c
+@@ -898,6 +898,7 @@ fremote (int fd, const char *name)
+         case 0:
+           break;
+         case -1:
++#if 0
+           {
+             unsigned long int fs_type = buf.f_type;
+             error (0, 0, _("unrecognized file system type 0x%08lx for %s. "
+@@ -905,6 +906,7 @@ fremote (int fd, const char *name)
+                    fs_type, quote (name), PACKAGE_BUGREPORT);
+             /* Treat as "remote", so caller polls.  */
+           }
++#endif
+           break;
+         case 1:
+           remote = false;
