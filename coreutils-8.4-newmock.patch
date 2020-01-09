@@ -15,3 +15,17 @@ diff -urNp coreutils-8.4-orig/tests/test-lib.sh coreutils-8.4/tests/test-lib.sh
    case `ls --scontext -d . | cut -f1 -d" "` in
      '?'|'unlabeled')
        skip_test_ "this system (or maybe just" \
+diff --git a/tests/test-lib.sh b/tests/test-lib.sh
+index 1e9f2eb..55819aa 100644
+--- a/tests/test-lib.sh
++++ b/tests/test-lib.sh
+@@ -229,6 +229,9 @@ require_selinux_()
+   grep 'selinuxfs$' /proc/filesystems > /dev/null \
+     || skip_test_ "this system lacks SELinux support"
+ 
++  # yet another test for buggy chrooted environments
++  test -n "$(ls /selinux)" || skip_test_ "/selinux not populated"
++
+   # Independent of whether SELinux is enabled system-wide,
+   # the current file system may lack SELinux support.
+   case `ls --scontext -d . | cut -f1 -d" "` in

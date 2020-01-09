@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 46%{?dist}
+Release: 47%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -26,6 +26,8 @@ Patch2: coreutils-8.4-xattrmodule.patch
 Patch3: coreutils-8.4-ls-enotsupimprovement.patch
 #su: deny killing other processes with root privileges (CVE-2017-2616)
 Patch4: coreutils-8.4-su-CVE-2017-2616.patch
+#join: print fields in the correct order for unpaired lines (#1434468)
+Patch5: coreutils-8.4-join-field-order.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -300,6 +302,9 @@ Libraries for coreutils package.
 %patch801 -p1
 %patch4 -p1
 
+# additional patches
+%patch5 -p1
+
 chmod a+x tests/misc/sort-mb-tests tests/df/direct tests/ls/slink-acl tests/dd/sparse tests/dd/bytes tests/mkdir/p-acl.sh
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -492,6 +497,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Apr 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.4-47
+- join: print fields in the correct order for unpaired lines (#1434468)
+
 * Mon Feb 06 2017 Kamil Dudka <kdudka@redhat.com> - 8.4-46
 - pure rebuild to bring back support for acl_extended_file_nofollow() on x86_64
 
