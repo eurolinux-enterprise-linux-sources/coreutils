@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 15%{?dist}.1
+Release: 18%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -33,6 +33,14 @@ Patch8: coreutils-8.22-df-getdisk.patch
 Patch9: coreutils-8.22-df-filtermountlistupdate.patch
 #Prevent potential corruption of sparse files in cp
 Patch10: coreutils-8.22-cp-sparsecorrupt.patch
+#improve dirent d_type support verification (xfs build failure, #1263341)
+Patch11: coreutils-8.22-xfsbuildfailure.patch
+#Update filesystem magic lists from latest upstream (coreutils-8.25)
+Patch12: coreutils-8.22-newfilesystems.patch
+#Fix crash in date with empty TZ envvar
+Patch13: coreutils-8.22-date-emptyTZ.patch
+#df -l: do not hang on a dead autofs mount point (#1309247)
+Patch14: coreutils-8.22-df-autofs.patch 
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -53,6 +61,8 @@ Patch108: coreutils-8.22-ppc64le.patch
 Patch109: coreutils-8.22-id-groups.patch
 #fix some non-default tests failing in beaker environment(#1247641)
 Patch110: coreutils-8.22-non-defaulttests.patch
+#Fix sort -h for other than first field
+Patch111: coreutils-8.22-sort-blanks.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -68,6 +78,9 @@ Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 #Temporarily disable df symlink test, failing
 Patch913: coreutils-8.22-temporarytestoff.patch
+#Disable id/setgid.sh test, fix false positive failure of cp-a-selinux test 
+# (#1266501, #1266500)
+Patch914: coreutils-8.22-failingtests.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -159,6 +172,10 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch8 -p1 -b .getdisk
 %patch9 -p1 -b .findmnt
 %patch10 -p1 -b .sparse
+%patch11 -p1 -b .d_type
+%patch12 -p1 -b .newfs
+%patch13 -p1 -b .emptytz
+%patch14 -p1 -b .df-autofs
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -170,6 +187,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch108 -p1 -b .ppc64le
 %patch109 -p1 -b .groups
 %patch110 -p1 -b .nondefault
+%patch111 -p1 -b .blanks
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -182,6 +200,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .testoff
+%patch914 -p1 -b .testfail
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -211,6 +230,8 @@ automake --copy --add-missing
 
 # Regenerate manpages
 touch man/*.x
+# Do not regenerate fs-is-local.h
+touch src/fs-is-local.h
 
 make all %{?_smp_mflags}
 
@@ -409,8 +430,21 @@ fi
 %{_sbindir}/chroot
 
 %changelog
-* Wed Nov 25 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-15.1
-- cp: prevent potential sparse file corruption (#1285365)
+* Fri Jul 01 2016 Ondrej Vasik <ovasik@redhat.com> - 8.22-18
+- fix xfs build failure in chrooted environment (#1263341)
+- update filesystem lists for stat and tail from latest upstream
+  (#1327881, #1280357) 
+- disable id/setgid.sh test(missing chroot feature), fix 
+  cp-a-selinux test (#1266500,#1266501)
+- colorls.sh - change detection of interactive shell for ksh
+  compatibility (#1321648)
+- fix date --date crash with empty or invalid TZ envvar (#1325786)
+- df -l: do not hang on a dead autofs mount point (#1309247)
+- sort -h: fix functionality of human readable numeric sort for other
+  than first field (#1328360)
+
+* Wed Nov 25 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-16
+- cp: prevent potential sparse file corruption (#1284906)
 
 * Sat Sep 12 2015 Ondrej Vasik <ovasik@redhat.com> - 8.22-15
 - fix one more occurance of non-full path in colorls.sh (#1222223)
