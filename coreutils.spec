@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 43%{?dist}
+Release: 46%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -24,6 +24,8 @@ Patch1: coreutils-8.4-who-msgstatus.patch
 Patch2: coreutils-8.4-xattrmodule.patch
 #ls: improve efficiency on fs without acl/xattr/selinux support (#1248141)
 Patch3: coreutils-8.4-ls-enotsupimprovement.patch
+#su: deny killing other processes with root privileges (CVE-2017-2616)
+Patch4: coreutils-8.4-su-CVE-2017-2616.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -60,6 +62,8 @@ Patch713: coreutils-4.5.3-langinfo.patch
 
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
 Patch800: coreutils-i18n.patch
+# fix the functionality of 'sort -h -k ...' in multi-byte locales (#1357979)
+Patch801: coreutils-8.4-sort-blanks.patch
 
 #Call setsid() in su under some circumstances (bug #173008).
 Patch900: coreutils-setsid.patch
@@ -292,6 +296,10 @@ Libraries for coreutils package.
 %patch955 -p1 -b .newfs2
 %patch956 -p1 -b .defaultacls
 
+# rhel-6.9 patches
+%patch801 -p1
+%patch4 -p1
+
 chmod a+x tests/misc/sort-mb-tests tests/df/direct tests/ls/slink-acl tests/dd/sparse tests/dd/bytes tests/mkdir/p-acl.sh
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -484,6 +492,17 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Feb 06 2017 Kamil Dudka <kdudka@redhat.com> - 8.4-46
+- pure rebuild to bring back support for acl_extended_file_nofollow() on x86_64
+
+* Mon Feb 06 2017 Kamil Dudka <kdudka@redhat.com> - 8.4-45
+- su: deny killing other processes with root privileges (CVE-2017-2616)
+
+* Tue Oct 04 2016 Kamil Dudka <kdudka@redhat.com> - 8.4-44
+- fix the functionality of 'sort -h -k ...' in multi-byte locales (#1357979)
+- use correct path to grep(1) in colorls.sh (#1376892)
+- make colorls.sh compatible with ksh (#1321643)
+
 * Wed Feb 10 2016 Ondrej Vasik <ovasik@redhat.com> - 8.4-43
 - sed should actually be /bin/sed (related #1222140)
 

@@ -8,7 +8,7 @@ if [ -z "$USER_LS_COLORS" ]; then
 
 
   # Skip the rest for noninteractive shells.
-  [ -z "$PS1" ] && return
+  [ ! -t 0 ] && return
 
   COLORS=
 
@@ -32,7 +32,7 @@ if [ -z "$USER_LS_COLORS" ]; then
 
   eval "`/usr/bin/dircolors --sh "$COLORS" 2>/dev/null`"
   [ -z "$LS_COLORS" ] && return
-  /usr/bin/grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
+  /bin/grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
 fi
 
 alias ll='ls -l --color=auto' 2>/dev/null
