@@ -135,8 +135,8 @@ diff -urNp coreutils-8.4-orig/tests/test-lib.sh coreutils-8.4/tests/test-lib.sh
  
 +require_setfacl_()
 +{
-+  setfacl -m user::rwx . \
-+    || skip_ "setfacl does not work on the current file system"
++  setfacl -m user::rwx . 2>/dev/null \
++    || skip_test_ "setfacl does not work on the current file system"
 +}
 +
  require_openat_support_()

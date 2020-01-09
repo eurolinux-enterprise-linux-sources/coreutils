@@ -18,7 +18,7 @@ if [ -z "$USER_LS_COLORS" ]; then
   done
 
   [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
-      [ "x`tty -s && tput colors 2>/dev/null`" = "x256" ] && \
+      [ "x`/usr/bin/tty -s && /usr/bin/tput colors 2>/dev/null`" = "x256" ] && \
       COLORS="/etc/DIR_COLORS.256color"
 
   if [ -z "$COLORS" ]; then
@@ -30,9 +30,9 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
 
-  eval "`dircolors --sh "$COLORS" 2>/dev/null`"
+  eval "`/usr/bin/dircolors --sh "$COLORS" 2>/dev/null`"
   [ -z "$LS_COLORS" ] && return
-  grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
+  /usr/bin/grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
 fi
 
 alias ll='ls -l --color=auto' 2>/dev/null

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 37%{?dist}.3
+Release: 43%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -82,7 +82,7 @@ Patch918: coreutils-8.4-tail-sleepinterval.patch
 Patch919: coreutils-8.4-tac-doublefree.patch
 #fix segfault in sort if LC_TIME differs from the rest of locales(#649224)
 Patch920: coreutils-8.4-sort-monthssigsegv.patch
-#make note in infopage about mkdir --mode behaviour(#6092620
+#make note in infopage about mkdir --mode behaviour(#609262)
 Patch921: coreutils-8.4-mkdir-modenote.patch
 #make note about dropped ninth bit of 3-digit octal values in byte
 #representations(#660033)
@@ -142,16 +142,26 @@ Patch946: coreutils-8.4-tail-symlink-polling.patch
 Patch947: coreutils-8.4-chcon-defaultsymlink.patch
 #fix the dd test sparse on xfs (#1075679)
 Patch948: coreutils-8.4-dd-sparse-xfsfailtest.patch
-#su: fix incorrect message printing when su is killed (#1266380)
+#su: fix incorrect message printing when su is killed (#1147532)
 Patch949: coreutils-8.4-su-coredump-message.patch
+#prevent build failure on system with mock>=1.1.9
+Patch952: coreutils-8.4-newmock.patch
+#du: Improve du error message of coreutils commands in a chrooted environment
+#(#1086916)
+Patch953: coreutils-8.4-du-bogus-warning.patch
+#su: suppress (optional) lastlogin message in non-interactive mode (#1267588)
+Patch954: coreutils-8.4-su-lastlogin.patch
+#filesystem list supported by tail/stat updated in RHEL 6.8, added all new fs
+#recognized by upstream by Jan 1st 2016 (#1280333)
+Patch955: coreutils-8.4-tailstatnewfs2.patch
+#mkdir, mkfifo, mknod - respect default umask/acls when COREUTILS_CHILD_DEFAULT_ACLS envvar is set (to match rhel 7 behaviour
+Patch956: coreutils-8.4-mkdir-parents-defaultacls.patch
 
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
-#prevent build failure on system with mock>=1.1.9
-Patch952: coreutils-8.4-newmock.patch
 
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
@@ -273,12 +283,16 @@ Libraries for coreutils package.
 %patch947 -p1 -b .symlink
 %patch948 -p1 -b .xfs
 %patch949 -p1 -b .su-coredump-msg
+%patch953 -p1 -b .du-bogus-msg
 %patch107 -p1 -b .symder
 %patch108 -p1 -b .countbytes
 %patch109 -p1 -b .nouser
 %patch3 -p1 -b .enotsup
+%patch954 -p1 -b .lastlogin
+%patch955 -p1 -b .newfs2
+%patch956 -p1 -b .defaultacls
 
-chmod a+x tests/misc/sort-mb-tests tests/df/direct tests/ls/slink-acl tests/dd/sparse tests/dd/bytes
+chmod a+x tests/misc/sort-mb-tests tests/df/direct tests/ls/slink-acl tests/dd/sparse tests/dd/bytes tests/mkdir/p-acl.sh
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -470,12 +484,27 @@ fi
 %{_libdir}/coreutils
 
 %changelog
-* Wed Oct 21 2015  Ondrej Vasik <ovasik@redhat.com> - 8.4-37.3
-- ls: improve efficiency on filesystems without support for ACLs,
-  xattrs or SELinux (#1273823)
+* Wed Feb 10 2016 Ondrej Vasik <ovasik@redhat.com> - 8.4-43
+- sed should actually be /bin/sed (related #1222140)
 
-* Fri Sep 25 2015 Ondrej Oprala <ooprala@redhat.com> - 8.4-37.1
-- su: fix incorrect message printing when su is killed (#1266380)
+* Wed Jan 06 2016 Ondrej Vasik <ovasik@redhat.com> - 8.4-41
+- colorls.sh,colorls.csh - call utilities with complete path (#1222140)
+- mkdir, mkfifo, mknod - respect default umask/acls when 
+  COREUTILS_CHILD_DEFAULT_ACLS envvar is set (to match rhel 7 behaviour,
+  #1237383)
+
+* Wed Oct 21 2015  Ondrej Vasik <ovasik@redhat.com> - 8.4-40
+- ls: improve efficiency on filesystems without support for ACLs,
+  xattrs or SELinux (#1248141)
+- su: suppress PAM info messages for -c or non-login sessions (#1267588)
+- tail, stat: recognize several new filesystems - up2date by Jan 1st 2016 (#1280333)
+
+* Thu Oct 15 2015  Ondrej Oprala <ooprala@redhat.com> - 8.4-39
+- du: improve du error message of coreutils commands in a chrooted environment
+  (patch by Boris Ranto) (#1086916)
+
+* Thu Sep 24 2015 Kamil Dudka <kdudka@redhat.com> - 8.4-38
+- su: fix incorrect message printing when su is killed (#1147532)
 
 * Wed Jul 16 2014 Ondrej Oprala <ooprala@redhat.com> - 8.4-37
 - df: canonicalize mount list device names as well (#812449)
