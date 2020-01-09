@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 18%{?dist}
+Release: 21%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -42,6 +42,12 @@ Patch13: coreutils-8.22-date-emptyTZ.patch
 #df -l: do not hang on a dead autofs mount point (#1309247)
 Patch14: coreutils-8.22-df-autofs.patch 
 
+# ls: allow interruption when reading slow directories (#1421802)
+Patch15: coreutils-8.22-ls-interruption.patch
+
+# df: do not stat file systems that do not satisfy the -t/-x args (#1511947)
+Patch17: coreutils-8.22-df-stat.patch
+
 # Our patches
 #general patch to workaround koji build system issues
 Patch100: coreutils-6.10-configuration.patch
@@ -71,6 +77,9 @@ Patch713: coreutils-4.5.3-langinfo.patch
 
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
 Patch800: coreutils-i18n.patch
+
+# fold: preserve new-lines in mutlibyte text (#1418505)
+Patch801: coreutils-i18n-fold-newline.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -206,6 +215,11 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 %patch5 -p1 -b .separate
+
+# patches added in RHEL-7.5
+%patch801 -p1
+%patch15  -p1
+%patch17  -p1
 
 chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh tests/dd/stats.sh || :
 
@@ -430,6 +444,17 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Dec 04 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-21
+- timeout: revert the last fix for a possible race (#1439465)
+
+* Thu Nov 23 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-20
+- df: do not stat file systems that do not satisfy the -t/-x args (#1511947)
+
+* Thu Sep 21 2017 Kamil Dudka <kdudka@redhat.com> - 8.22-19
+- timeout: fix race possibly terminating wrong process (#1439465)
+- ls: allow interruption when reading slow directories (#1421802)
+- fold: preserve new-lines in mutlibyte text (#1418505)
+
 * Fri Jul 01 2016 Ondrej Vasik <ovasik@redhat.com> - 8.22-18
 - fix xfs build failure in chrooted environment (#1263341)
 - update filesystem lists for stat and tail from latest upstream

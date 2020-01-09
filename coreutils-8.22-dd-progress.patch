@@ -1,7 +1,7 @@
 From af2a4ed22594badd2719c0123441d69b17bd8328 Mon Sep 17 00:00:00 2001
 From: Federico Simoncelli <fsimonce@redhat.com>
 Date: Fri, 26 Sep 2014 17:12:32 +0000
-Subject: dd: new status=progress level to print stats periodically
+Subject: [PATCH] dd: new status=progress level to print stats periodically
 
 * src/dd.c: Report the transfer progress every second when the
 new status=progress level is used.  Adjust the handling and
@@ -406,8 +406,8 @@ index f877fdd..34dfba7 100755
  compare $tmp_in $tmp_out || fail=1
 diff --git a/tests/dd/stats.sh b/tests/dd/stats.sh
 new file mode 100755
-index 0000000..24b8c49`
---- a/dev/null
+index 0000000..24b8c49 100755
+--- /dev/null
 +++ b/tests/dd/stats.sh
 @@ -0,0 +1,65 @@
 +#!/bin/sh
